@@ -7,6 +7,12 @@ module.exports = async function(req, reply) {
     throw new Error("API: Niet")
   }
 
-  reply.etag(doc._rev)
-  return doc
+  if (doc._deleted && !req.query.deleted) {
+    reply.code(404)
+    throw new Error("API: Niet (deleted)")
+  }
+
+  // const doc2 = this.db.deleteDoc(doc._id, doc._rev)
+  reply.etag(doc2._rev)
+  return doc2
 }
