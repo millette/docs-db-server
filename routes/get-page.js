@@ -12,7 +12,6 @@ module.exports = async function(req, reply) {
     throw new Error("API: Niet (deleted)")
   }
 
-  // const doc2 = this.db.deleteDoc(doc._id, doc._rev)
-  reply.header("Last-Modified", doc2._updated).etag(doc2._rev)
-  return doc2
+  reply.header("Last-Modified", doc._updated).etag(doc._rev)
+  return doc
 }

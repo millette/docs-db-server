@@ -1,15 +1,17 @@
 "use strict"
 
 // npm
-const fastify = require("fastify")({ logging: true })
 const DocsDb = require("docs-db")
+const fastify = require("fastify")({ logging: true })
 fastify.register(require("fastify-response-time"))
 fastify.register(require("fastify-caching"))
 
 // self
-const { getPage } = require("./routes")
+const { getPage, deletePage } = require("./routes")
 
-fastify.get("/api/page/:page", getPage)
+fastify.get("/page/:page", getPage)
+// fastify.get("/api/delete/:page", deletePage)
+fastify.delete("/page/:page", deletePage)
 
 /*
 fastify.put("/api/page/:page", async (req, reply) => {
