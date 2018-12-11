@@ -4,6 +4,7 @@
   "main": "index.js",
   "bin": "server.js",
   "scripts": {
+    "start": "node server.js",
     "deps": "dependency-check . && dependency-check . --unused --no-dev",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -38,8 +39,8 @@
   },
   "dependencies": {
     "docs-db": "0.0.1",
-    "fastify": "^1.13.1",
-    "fastify-caching": "^3.0.0",
-    "fastify-response-time": "^1.1.0"
+    "fastify": "^2.0.0-rc.1",
+    "fastify-caching": "^4.0.0",
+    "fastify-response-time": "millette/fastify-response-time#fastify-v2"
   }
 }
