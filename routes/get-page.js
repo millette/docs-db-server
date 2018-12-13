@@ -1,7 +1,8 @@
 "use strict"
 
 module.exports = async function(req, reply) {
-  const doc = this.db.getDoc(req.params.page)
+  const doc = this.db.getDoc(req.params.page, req.query.rev)
+
   if (!doc) {
     reply.code(404)
     throw new Error("API: Niet")
@@ -12,6 +13,6 @@ module.exports = async function(req, reply) {
     throw new Error("API: Niet (deleted)")
   }
 
-  reply.header("Last-Modified", doc._updated).etag(doc._rev)
+  reply.lastMod(doc._updated).etag(doc._rev)
   return doc
 }
