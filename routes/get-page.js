@@ -14,5 +14,8 @@ module.exports = async function(req, reply) {
   }
 
   reply.lastMod(doc._updated).etag(doc._rev)
-  return doc
+  if (req.raw.method === "GET") return doc
+  if (req.raw.method !== "HEAD") throw new Error("Unexpected getPage")
+  reply.code(204)
+  reply.header("content-length", JSON.stringify(doc).length)
 }

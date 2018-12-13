@@ -17,6 +17,7 @@ const { URL } = require("url")
 const { getPage, getPages, deletePage } = require("./routes")
 
 fastify.get("/pages", getPages)
+fastify.head("/page/:page", getPage)
 fastify.get("/page/:page", getPage)
 // fastify.get("/api/delete/:page", deletePage)
 fastify.delete("/page/:page", deletePage)
