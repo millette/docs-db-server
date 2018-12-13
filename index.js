@@ -2,7 +2,10 @@
 
 // npm
 const DocsDb = require("docs-db")
-const fastify = require("fastify")({ logging: true })
+const fastify = require("fastify")({
+  trustProxy: "127.0.0.1",
+  logger: true,
+})
 fastify.register(require("fastify-response-time"))
 fastify.register(require("fastify-caching"))
 
@@ -28,12 +31,20 @@ const pagedUrl = (u, page, rel) => {
   return `<${u}>; rel="${rel}"`
 }
 
-const pagination = function(len, page, f, raw) {
+const pagination = function(
+  len,
+  page,
+  perPage,
+  { raw: { url }, headers: { host, ...h } },
+) {
   const first = 0
   const previous = page > 0 && page - 1
-  const last = Math.ceil(len / f.perPage) - 1
+  const last = Math.ceil(len / perPage) - 1
   const next = page < last && page + 1
-  const u = new URL(raw.url, f.address)
+
+  // FIXME: add support for local https
+  // const u = new URL(url, `${headers['x-forwarded-proto'] || 'http'}://${headers.host}`)
+  const u = new URL(url, `${h["x-forwarded-proto"] || "http"}://${host}`)
   const links = [pagedUrl(u, first, "first"), pagedUrl(u, last, "last")]
   if (previous !== false) links.push(pagedUrl(u, previous, "previous"))
   if (next !== false) links.push(pagedUrl(u, next, "next"))
@@ -56,7 +67,6 @@ module.exports = (port, hostname, docs) => {
   fastify.decorateReply("lastMod", lastMod)
   console.log(`Done reading (${(Date.now() - now) / 1000}s).`)
   return fastify.listen(port, hostname).then((address) => {
-    fastify.decorate("address", address)
     console.log(`Server listening on ${address}`)
     return address
   })

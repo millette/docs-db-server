@@ -53,7 +53,7 @@ module.exports = async function(req, reply) {
 
   const { _rev, _updated } = d2.slice(-1)[0]
   reply
-    .pagination(docs.length, page, this, req.raw)
+    .pagination(docs.length, page, this.perPage, req)
     .lastMod(_updated)
     .etag(`${this.perPage}-${_rev}`)
   return d4
