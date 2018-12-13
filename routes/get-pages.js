@@ -58,5 +58,9 @@ module.exports = async function(req, reply) {
     .pagination(docs.length, page, this.perPage, req)
     .lastMod(_updated)
     .etag(`${this.perPage}-${_rev}`)
-  return d4
+
+  if (req.raw.method === "GET") return d4
+  if (req.raw.method !== "HEAD") throw new Error("Unexpected getPages")
+  reply.code(204)
+  reply.header("content-length", JSON.stringify(d4).length)
 }
