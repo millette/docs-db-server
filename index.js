@@ -24,6 +24,7 @@ module.exports = (port, hostname, docs) => {
   const now = Date.now()
   console.log("Reading...")
   fastify.decorate("db", new DocsDb(docs))
+  fastify.decorate("perPage", 24)
   fastify.decorateReply("lastMod", function(date) {
     return this.header(
       "Last-Modified",
