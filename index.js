@@ -23,6 +23,12 @@ module.exports = (port, hostname, docs) => {
   const now = Date.now()
   console.log("Reading...")
   fastify.decorate("db", new DocsDb(docs))
+  fastify.decorateReply("lastMod", function(date) {
+    return this.header(
+      "Last-Modified",
+      typeof date === "string" ? date : new Date(date).toGMTString(),
+    )
+  })
   console.log(`Done reading (${(Date.now() - now) / 1000}s).`)
   return fastify
     .listen(port, hostname)
