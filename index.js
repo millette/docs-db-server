@@ -34,9 +34,7 @@ const pagination = function(len, page, f, raw) {
   const last = Math.ceil(len / f.perPage) - 1
   const next = page < last && page + 1
   const u = new URL(raw.url, f.address)
-
   const links = [pagedUrl(u, first, "first"), pagedUrl(u, last, "last")]
-
   if (previous !== false) links.push(pagedUrl(u, previous, "previous"))
   if (next !== false) links.push(pagedUrl(u, next, "next"))
   return this.header("Link", links.join(", "))
