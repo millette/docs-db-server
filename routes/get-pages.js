@@ -1,8 +1,5 @@
 "use strict"
 
-// core
-const assert = require("assert").strict
-
 const makeSorter = (sort) => (a, b) => {
   const af = a[sort]
   const bf = b[sort]
@@ -19,6 +16,12 @@ const format = ({ _created, _updated, ...rest }) => ({
   ...rest,
 })
 
+const assert = (reply, condition, message) => {
+  if (condition) return
+  reply.code(400)
+  throw new Error(message)
+}
+
 module.exports = async function(req, reply) {
   // TODO: cache until dirty (handle in docs-db)
   const docs = this.db.docMetas
@@ -28,15 +31,21 @@ module.exports = async function(req, reply) {
   }
 
   const asc = "asc" in req.query
-  assert(!req.query.page || !isNaN(req.query.page), "page should be an integer")
-  assert(!asc || !req.query.asc, "asc should not have any value")
+  // FIXME: use reply.code(400) and throw instead
+  assert(
+    reply,
+    !req.query.page || !isNaN(req.query.page),
+    "page should be an integer",
+  )
+  assert(reply, !asc || !req.query.asc, "asc should not have any value")
 
   const d2 = docs.sort(sorterLastMod)
   const { _rev, _updated } = d2[0]
   let d3
   if (req.query.sort) {
     const sort = "_" + req.query.sort
-    assert(sort in docs[0], "Unknown sort field")
+    // FIXME: use reply.code(400) and throw instead
+    assert(reply, sort in docs[0], "Unknown sort field")
     d3 = sort === "_updated" ? d2 : docs.sort(makeSorter(sort))
     if (asc) d3 = d3.reverse()
   } else {
