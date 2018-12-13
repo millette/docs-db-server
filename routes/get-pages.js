@@ -22,10 +22,17 @@ module.exports = async function(req, reply) {
     reply.code(404)
     throw new Error("No content at all")
   }
+
+  // FIXME: use assert
+  if (req.query.page && isNaN(req.query.page)) {
+    throw new Error("Page should be an integer")
+  }
+
   const d2 = docs.sort(sorterLastMod)
   let d3
   if (req.query.sort) {
     const sort = "_" + req.query.sort
+    // FIXME: use assert
     if (!(sort in docs[0])) throw new Error("Unknown sort field")
     d3 = sort === "_updated" ? d2 : docs.sort(makeSorter(sort))
     if (req.query.desc) d3 = d3.reverse()
@@ -33,7 +40,7 @@ module.exports = async function(req, reply) {
     d3 = docs
   }
 
-  const page = req.query.page || 0
+  const page = parseInt(req.query.page, 10) || 0
 
   const d4 = d3
     .slice(page * this.perPage, page * this.perPage + this.perPage)
@@ -45,6 +52,9 @@ module.exports = async function(req, reply) {
   }
 
   const { _rev, _updated } = d2.slice(-1)[0]
-  reply.lastMod(_updated).etag(`${this.perPage}-${_rev}`)
+  reply
+    .pagination(docs.length, page, this, req.raw)
+    .lastMod(_updated)
+    .etag(`${this.perPage}-${_rev}`)
   return d4
 }
