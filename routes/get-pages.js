@@ -26,15 +26,18 @@ module.exports = async function(req, reply) {
     throw new Error("No content at all")
   }
 
-  assert(!req.query.page || !isNaN(req.query.page), "Page should be an integer")
+  const asc = "asc" in req.query
+  assert(!req.query.page || !isNaN(req.query.page), "page should be an integer")
+  assert(!asc || !req.query.asc, "asc should not have any value")
 
   const d2 = docs.sort(sorterLastMod)
+  const { _rev, _updated } = d2[0]
   let d3
   if (req.query.sort) {
     const sort = "_" + req.query.sort
     assert(sort in docs[0], "Unknown sort field")
     d3 = sort === "_updated" ? d2 : docs.sort(makeSorter(sort))
-    if (req.query.asc) d3 = d3.reverse()
+    if (asc) d3 = d3.reverse()
   } else {
     d3 = docs
   }
@@ -50,7 +53,6 @@ module.exports = async function(req, reply) {
     throw new Error("No content found")
   }
 
-  const { _rev, _updated } = d2.slice(-1)[0]
   reply
     .pagination(docs.length, page, this.perPage, req)
     .lastMod(_updated)
