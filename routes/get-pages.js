@@ -18,23 +18,33 @@ const format = ({ _created, _updated, ...rest }) => ({
 
 module.exports = async function(req, reply) {
   const docs = this.db.docMetas
-  if (!docs.length) return []
-  const page = req.query.page || 0
-  const d2 = docs.sort(sorterLastMod)
-  const { _rev, _updated } = d2.slice(-1)[0]
-  const etag = `${this.perPage}-${_rev}`
-  if (!req.query.sort) {
-    reply.lastMod(_updated).etag(etag)
-    return docs
-      .slice(page * this.perPage, page * this.perPage + this.perPage)
-      .map(format)
+  if (!docs.length) {
+    reply.code(404)
+    throw new Error("No content at all")
   }
-  const sort = "_" + req.query.sort
-  if (!(sort in docs[0])) throw new Error("Unknown sort field")
-  const d2a = sort === "_updated" ? d2 : docs.sort(makeSorter(sort))
-  const d3 = req.query.desc ? d2a.reverse() : d2a
-  reply.lastMod(_updated).etag(etag)
-  return d3
+  const d2 = docs.sort(sorterLastMod)
+  let d3
+  if (req.query.sort) {
+    const sort = "_" + req.query.sort
+    if (!(sort in docs[0])) throw new Error("Unknown sort field")
+    d3 = sort === "_updated" ? d2 : docs.sort(makeSorter(sort))
+    if (req.query.desc) d3 = d3.reverse()
+  } else {
+    d3 = docs
+  }
+
+  const page = req.query.page || 0
+
+  const d4 = d3
     .slice(page * this.perPage, page * this.perPage + this.perPage)
     .map(format)
+
+  if (!d4.length) {
+    reply.code(404)
+    throw new Error("No content found")
+  }
+
+  const { _rev, _updated } = d2.slice(-1)[0]
+  reply.lastMod(_updated).etag(`${this.perPage}-${_rev}`)
+  return d4
 }
