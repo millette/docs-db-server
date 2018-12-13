@@ -43,7 +43,6 @@ const pagination = function(
   const next = page < last && page + 1
 
   // FIXME: add support for local https
-  // const u = new URL(url, `${headers['x-forwarded-proto'] || 'http'}://${headers.host}`)
   const u = new URL(url, `${h["x-forwarded-proto"] || "http"}://${host}`)
   const links = [pagedUrl(u, first, "first"), pagedUrl(u, last, "last")]
   if (previous !== false) links.push(pagedUrl(u, previous, "previous"))

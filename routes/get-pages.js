@@ -1,5 +1,8 @@
 "use strict"
 
+// core
+const assert = require("assert").strict
+
 const makeSorter = (sort) => (a, b) => {
   const af = a[sort]
   const bf = b[sort]
@@ -23,17 +26,13 @@ module.exports = async function(req, reply) {
     throw new Error("No content at all")
   }
 
-  // FIXME: use assert
-  if (req.query.page && isNaN(req.query.page)) {
-    throw new Error("Page should be an integer")
-  }
+  assert(!req.query.page || !isNaN(req.query.page), "Page should be an integer")
 
   const d2 = docs.sort(sorterLastMod)
   let d3
   if (req.query.sort) {
     const sort = "_" + req.query.sort
-    // FIXME: use assert
-    if (!(sort in docs[0])) throw new Error("Unknown sort field")
+    assert(sort in docs[0], "Unknown sort field")
     d3 = sort === "_updated" ? d2 : docs.sort(makeSorter(sort))
     if (req.query.asc) d3 = d3.reverse()
   } else {
