@@ -8,6 +8,7 @@ const fastify = require("fastify")({
 })
 fastify.register(require("fastify-response-time"))
 fastify.register(require("fastify-caching"))
+fastify.register(require("fastify-cors"))
 
 // core
 const { URL } = require("url")

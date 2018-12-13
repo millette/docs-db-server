@@ -20,6 +20,7 @@ const format = ({ _created, _updated, ...rest }) => ({
 })
 
 module.exports = async function(req, reply) {
+  // TODO: cache until dirty (handle in docs-db)
   const docs = this.db.docMetas
   if (!docs.length) {
     reply.code(404)
