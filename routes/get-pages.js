@@ -3,8 +3,8 @@
 const makeSorter = (sort) => (a, b) => {
   const af = a[sort]
   const bf = b[sort]
-  if (af > bf) return 1
-  if (af < bf) return -1
+  if (af > bf) return -1
+  if (af < bf) return 1
   return 0
 }
 
@@ -35,7 +35,7 @@ module.exports = async function(req, reply) {
     // FIXME: use assert
     if (!(sort in docs[0])) throw new Error("Unknown sort field")
     d3 = sort === "_updated" ? d2 : docs.sort(makeSorter(sort))
-    if (req.query.desc) d3 = d3.reverse()
+    if (req.query.asc) d3 = d3.reverse()
   } else {
     d3 = docs
   }
