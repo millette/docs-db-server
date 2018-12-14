@@ -78,6 +78,7 @@ module.exports = ({ config = {}, docs }) => {
   }
   if (config.cors) fastify.register(require("fastify-cors"))
 
+  // routes
   fastify.head("/pages", getPages)
   fastify.get("/pages", getPages)
   fastify.head("/page/:page", getPage)
