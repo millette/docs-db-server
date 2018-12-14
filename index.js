@@ -2,13 +2,16 @@
 
 // npm
 // const DocsDb = require("docs-db")
-// const fastifyMod = require("fastify")
+const fastifyMod = require("fastify")
+
+/*
 const fastify = require("fastify")({
   // trustProxy: config.fastify.trustProxy,
   // logger: config.fastify.logger,
   trustProxy: "127.0.0.1",
   logger: true,
 })
+*/
 
 /*
 const deepMerge = require("deepmerge")
@@ -109,8 +112,20 @@ module.exports = ({ config = {}, docs }) => {
   fastify.decorateReply("pagination", pagination)
   fastify.log.info(`Done reading (${(Date.now() - now) / 1000}s).`)
   */
+
+  const fastify = require("fastify")({
+    // trustProxy: config.fastify.trustProxy,
+    // logger: config.fastify.logger,
+    trustProxy: config.trustProxy,
+    logger: config.logger,
+  })
+
   fastify.register(require("./plugin"), { config, docs })
 
   // return fastify.listen(config.main.port, config.main.hostname)
-  return fastify.listen(3000, process.env.HOSTNAME)
+  // return fastify.listen(3000, process.env.HOSTNAME)
+  return fastify.listen(
+    config.port || 3000,
+    config.hostname || process.env.HOSTNAME,
+  )
 }
