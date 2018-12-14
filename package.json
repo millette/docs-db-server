@@ -31,7 +31,6 @@
   "license": "AGPL-3.0",
   "devDependencies": {
     "ava": "^1.0.0-rc.2",
-    "chance": "^1.0.18",
     "dependency-check": "^3.2.1",
     "husky": "^1.2.1",
     "lint-staged": "^8.1.0",
@@ -39,11 +38,7 @@
     "prettier": "^1.15.3"
   },
   "dependencies": {
-    "docs-db": "0.0.4",
     "fastify": "^2.0.0-rc.2",
-    "fastify-caching": "^4.0.0",
-    "fastify-cors": "^0.2.0",
-    "fastify-plugin": "^1.3.0",
-    "fastify-response-time": "millette/fastify-response-time#fastify-v2"
+    "fastify-docs-db": "0.0.1"
   }
 }

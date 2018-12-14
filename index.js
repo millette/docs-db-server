@@ -8,7 +8,7 @@ module.exports = ({ config = {}, docs }) => {
     trustProxy: config.trustProxy,
     logger: config.logger,
   })
-  fastify.register(require("./plugin"), { config, docs })
+  fastify.register(require("fastify-docs-db"), { config, docs })
   return fastify.listen(
     config.port || 3000,
     config.hostname || process.env.HOSTNAME,
