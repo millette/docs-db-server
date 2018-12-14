@@ -1,6 +1,6 @@
 // npm
 const fp = require("fastify-plugin")
-const deepMerge = require("deepmerge")
+// const deepMerge = require("deepmerge")
 const DocsDb = require("docs-db")
 
 // self
@@ -42,17 +42,20 @@ const lastMod = function(date, etag) {
 }
 
 const configDefault = {
+  /*
   fastify: {
     logger: true,
   },
-  responseTime: true,
-  caching: true,
-  cors: true,
   main: {
     perPage: 24,
     port: 3000,
     hostname: process.env.HOSTNAME,
   },
+  */
+  responseTime: true,
+  caching: true,
+  cors: true,
+  perPage: 24,
 }
 
 const nop = function() {
@@ -65,10 +68,9 @@ module.exports = fp(
 
     let { config, docs } = opts
 
-    console.log("opts.config:", opts.config)
-
     const n0 = Date.now()
-    config = deepMerge(configDefault, config)
+    // config = deepMerge(configDefault, config)
+    config = { ...configDefault, ...config }
     // move up
     /*
   const fastify = fastifyMod({
@@ -104,7 +106,8 @@ module.exports = fp(
 
     fastify.log.info("Reading...")
     fastify.decorate("db", new DocsDb(docs))
-    fastify.decorate("perPage", config.main.perPage)
+    // fastify.decorate("perPage", config.main.perPage)
+    fastify.decorate("perPage", config.perPage)
     fastify.decorateReply("pagination", pagination)
     fastify.log.info(`Done reading (${(Date.now() - now) / 1000}s).`)
 
