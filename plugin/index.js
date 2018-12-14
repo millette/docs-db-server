@@ -1,6 +1,5 @@
 // npm
 const fp = require("fastify-plugin")
-// const deepMerge = require("deepmerge")
 const DocsDb = require("docs-db")
 
 // self
@@ -42,16 +41,6 @@ const lastMod = function(date, etag) {
 }
 
 const configDefault = {
-  /*
-  fastify: {
-    logger: true,
-  },
-  main: {
-    perPage: 24,
-    port: 3000,
-    hostname: process.env.HOSTNAME,
-  },
-  */
   responseTime: true,
   caching: true,
   cors: true,
@@ -62,59 +51,44 @@ const nop = function() {
   return this
 }
 
-module.exports = fp(
-  function(fastify, opts, next) {
-    // your plugin code
+const plugin = function(fastify, opts, next) {
+  let { config, docs } = opts
+  const n0 = Date.now()
+  config = { ...configDefault, ...config }
+  fastify.log.info("Starting...")
+  if (config.responseTime) fastify.register(require("fastify-response-time"))
+  if (config.caching) {
+    fastify.register(require("fastify-caching"))
+    fastify.decorateReply("lastMod", lastMod)
+  } else {
+    fastify.decorateReply("etag", nop)
+    fastify.decorateReply("lastMod", nop)
+  }
+  if (config.cors) fastify.register(require("fastify-cors"))
 
-    let { config, docs } = opts
+  // routes
+  fastify.head("/pages", getPages)
+  fastify.get("/pages", getPages)
+  fastify.head("/page/:page", getPage)
+  fastify.get("/page/:page", getPage)
+  // fastify.get("/api/delete/:page", deletePage)
+  fastify.delete("/page/:page", deletePage)
 
-    const n0 = Date.now()
-    // config = deepMerge(configDefault, config)
-    config = { ...configDefault, ...config }
-    // move up
-    /*
-  const fastify = fastifyMod({
-    trustProxy: config.fastify.trustProxy,
-    logger: config.fastify.logger,
-  })
-  */
-    fastify.log.info("Starting...")
-    if (config.responseTime) fastify.register(require("fastify-response-time"))
-    if (config.caching) {
-      fastify.register(require("fastify-caching"))
-      fastify.decorateReply("lastMod", lastMod)
-    } else {
-      fastify.decorateReply("etag", nop)
-      fastify.decorateReply("lastMod", nop)
-    }
-    if (config.cors) fastify.register(require("fastify-cors"))
+  // fastify.put("/api/page/:page", async (req, reply) => {
+  // const page = req.params.page
+  // })
 
-    // routes
-    fastify.head("/pages", getPages)
-    fastify.get("/pages", getPages)
-    fastify.head("/page/:page", getPage)
-    fastify.get("/page/:page", getPage)
-    // fastify.get("/api/delete/:page", deletePage)
-    fastify.delete("/page/:page", deletePage)
+  fastify.log.info(`Done starting (${(Date.now() - n0) / 1000}s).`)
+  const now = Date.now()
+  fastify.log.info("Reading...")
+  fastify.decorate("db", new DocsDb(docs))
+  fastify.decorate("perPage", config.perPage)
+  fastify.decorateReply("pagination", pagination)
+  fastify.log.info(`Done reading (${(Date.now() - now) / 1000}s).`)
+  next()
+}
 
-    // fastify.put("/api/page/:page", async (req, reply) => {
-    // const page = req.params.page
-    // })
-
-    fastify.log.info(`Done starting (${(Date.now() - n0) / 1000}s).`)
-    const now = Date.now()
-
-    fastify.log.info("Reading...")
-    fastify.decorate("db", new DocsDb(docs))
-    // fastify.decorate("perPage", config.main.perPage)
-    fastify.decorate("perPage", config.perPage)
-    fastify.decorateReply("pagination", pagination)
-    fastify.log.info(`Done reading (${(Date.now() - now) / 1000}s).`)
-
-    next()
-  },
-  {
-    fastify: "^2.0.0",
-    name,
-  },
-)
+module.exports = fp(plugin, {
+  fastify: "^2.0.0",
+  name,
+})
