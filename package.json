@@ -38,6 +38,7 @@
     "prettier": "^1.15.3"
   },
   "dependencies": {
+    "deepmerge": "^3.0.0",
     "docs-db": "0.0.4",
     "fastify": "^2.0.0-rc.1",
     "fastify-caching": "^4.0.0",
