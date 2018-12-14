@@ -2,32 +2,14 @@
 
 // npm
 const DocsDb = require("docs-db")
-const fastify = require("fastify")({
-  trustProxy: "127.0.0.1",
-  logger: true,
-})
-fastify.register(require("fastify-response-time"))
-fastify.register(require("fastify-caching"))
-fastify.register(require("fastify-cors"))
+const fastifyMod = require("fastify")
+const deepMerge = require("deepmerge")
 
 // core
 const { URL } = require("url")
 
 // self
 const { getPage, getPages, deletePage } = require("./routes")
-
-fastify.head("/pages", getPages)
-fastify.get("/pages", getPages)
-fastify.head("/page/:page", getPage)
-fastify.get("/page/:page", getPage)
-// fastify.get("/api/delete/:page", deletePage)
-fastify.delete("/page/:page", deletePage)
-
-/*
-fastify.put("/api/page/:page", async (req, reply) => {
-  const page = req.params.page
-})
-*/
 
 const pagedUrl = (u, page, rel) => {
   u.searchParams.set("page", page)
@@ -53,23 +35,69 @@ const pagination = function(
   return this.header("Link", links.join(", "))
 }
 
-const lastMod = function(date) {
-  return this.header(
+const lastMod = function(date, etag) {
+  return this.etag(etag).header(
     "Last-Modified",
     typeof date === "string" ? date : new Date(date).toGMTString(),
   )
 }
 
-module.exports = (port, hostname, docs) => {
-  const now = Date.now()
-  console.log("Reading...")
-  fastify.decorate("db", new DocsDb(docs))
-  fastify.decorate("perPage", 24)
-  fastify.decorateReply("pagination", pagination)
-  fastify.decorateReply("lastMod", lastMod)
-  console.log(`Done reading (${(Date.now() - now) / 1000}s).`)
-  return fastify.listen(port, hostname).then((address) => {
-    console.log(`Server listening on ${address}`)
-    return address
+const configDefault = {
+  fastify: {
+    logger: true,
+  },
+  responseTime: true,
+  caching: true,
+  cors: true,
+  main: {
+    perPage: 24,
+    port: 3000,
+    hostname: process.env.HOSTNAME,
+  },
+}
+
+const nop = function() {
+  return this
+}
+
+module.exports = ({ config = {}, docs }) => {
+  const n0 = Date.now()
+  config = deepMerge(configDefault, config)
+  const fastify = fastifyMod({
+    trustProxy: config.fastify.trustProxy,
+    logger: config.fastify.logger,
   })
+  fastify.log.info("Starting...")
+  if (config.responseTime) fastify.register(require("fastify-response-time"))
+  if (config.caching) {
+    fastify.register(require("fastify-caching"))
+    fastify.decorateReply("lastMod", lastMod)
+  } else {
+    fastify.decorateReply("etag", nop)
+    fastify.decorateReply("lastMod", nop)
+  }
+  if (config.cors) fastify.register(require("fastify-cors"))
+
+  fastify.head("/pages", getPages)
+  fastify.get("/pages", getPages)
+  fastify.head("/page/:page", getPage)
+  fastify.get("/page/:page", getPage)
+  // fastify.get("/api/delete/:page", deletePage)
+  fastify.delete("/page/:page", deletePage)
+
+  /*
+  fastify.put("/api/page/:page", async (req, reply) => {
+    const page = req.params.page
+  })
+  */
+
+  fastify.log.info(`Done starting (${(Date.now() - n0) / 1000}s).`)
+  const now = Date.now()
+
+  fastify.log.info("Reading...")
+  fastify.decorate("db", new DocsDb(docs))
+  fastify.decorate("perPage", config.main.perPage)
+  fastify.decorateReply("pagination", pagination)
+  fastify.log.info(`Done reading (${(Date.now() - now) / 1000}s).`)
+  return fastify.listen(config.main.port, config.main.hostname)
 }
