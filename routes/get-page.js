@@ -13,7 +13,7 @@ module.exports = async function(req, reply) {
     throw new Error("API: Niet (deleted)")
   }
 
-  reply.lastMod(doc._updated).etag(doc._rev)
+  reply.lastMod(doc._updated, doc._rev)
   if (req.raw.method === "GET") return doc
   if (req.raw.method !== "HEAD") throw new Error("Unexpected getPage")
   reply.code(204)
