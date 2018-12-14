@@ -1,6 +1,7 @@
 {
   "name": "docs-db-server",
   "version": "0.0.0",
+  "description": "REST server with with fastify v2 and docs-db, a docs database with history support.",
   "main": "index.js",
   "bin": "server.js",
   "scripts": {
