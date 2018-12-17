@@ -5,7 +5,7 @@ const fastifyMod = require("fastify")
 
 module.exports = ({ config = {}, docs }) => {
   const { trustProxy, logger, port, hostname, ...cfg } = config
-  const fastify = fastifyMod({ trustProxy: trustProxy, logger: logger })
+  const fastify = fastifyMod({ trustProxy, logger })
   fastify.register(require("fastify-docs-db"), { config: cfg, docs })
-  return fastify.listen(port || 3000, hostname || process.env.HOSTNAME)
+  return fastify.listen(port, hostname)
 }
