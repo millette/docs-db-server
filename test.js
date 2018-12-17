@@ -10,9 +10,9 @@ test("me testo uno", async (t) => {
     docs: require("./out-fake.json"),
   })
 
-  const { body } = await got(`${base}/pages`, { json: true })
+  const { body } = await got(`${base}/api/pages`, { json: true })
   t.is(body.length, 24)
-  const b2 = await got(`${base}/page/${body[0]._id}`, { json: true })
+  const b2 = await got(`${base}/api/page/${body[0]._id}`, { json: true })
   t.is(b2.body._rev, body[0]._rev)
   t.truthy(b2.body.title)
   t.truthy(b2.body.content)
