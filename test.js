@@ -7,7 +7,7 @@ import srv from "."
 
 test("me testo uno", async (t) => {
   const base = await srv({
-    docs: require("./out-fake.json"),
+    docs: require("./out-pretty.json"),
   })
 
   const { body } = await got(`${base}/api/pages`, { json: true })
