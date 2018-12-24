@@ -43,6 +43,6 @@
   },
   "dependencies": {
     "fastify": "^2.0.0-rc.3",
-    "fastify-docs-db": "0.0.3"
+    "fastify-docs-db": "0.0.4"
   }
 }
