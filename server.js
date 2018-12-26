@@ -10,5 +10,5 @@ srv({
     port: 3000,
     hostname: process.env.HOSTNAME,
   },
-  docs: require("./out-fake.json"),
+  docs: require("./out-pretty.json"),
 }).catch(console.error)
